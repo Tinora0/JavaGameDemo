@@ -24,11 +24,16 @@ public class IWBTCSerApp extends GameApplication {
     private PlayerComponent playerComponent;
 
     // 检查点
-    private Point2D respawnPoint = new Point2D(100, 100);
 
+    private Point2D respawnPoint = new Point2D(100, 100); // 默认重生点，可外部设置
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void setRespawnPoint(Point2D p) {
+        this.respawnPoint = p;
+
     }
 
     @Override
@@ -48,12 +53,15 @@ public class IWBTCSerApp extends GameApplication {
         Entity p = spawn("player", 100, 100);
         player = p;
         playerComponent = p.getComponent(PlayerComponent.class);
+        getGameScene().getViewport()
+                .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);// 按下时开始向左移动
+
         spawn("ground", 100, 150);
         spawn("ground", 125, 150);
         spawn("ground", 150, 150);
         spawn("ground", 175, 150);
         spawn("spikeup", 200, 150);
-        spawn("ground", 225, 150);
+        spawn("savepoint", 225, 100);
 
     }
 
@@ -95,12 +103,14 @@ public class IWBTCSerApp extends GameApplication {
         input.addAction(new UserAction("Jump") {
             @Override
             protected void onActionBegin() {
+                if (playerComponent.isDead()) return;
                 playerComponent.setJumpHeld(true);
                 playerComponent.jump();
             }
 
             @Override
             protected void onActionEnd() {
+                if (playerComponent.isDead()) return;
                 playerComponent.setJumpHeld(false);
                 playerComponent.endJump();
             }
@@ -125,6 +135,14 @@ public class IWBTCSerApp extends GameApplication {
                 FXGL.inc("deathTime", +1);
             }
         }, KeyCode.R);
+        input.addAction(new UserAction("Shoot") {
+            @Override
+            protected void onActionBegin() {
+                if (playerComponent.isDead()) return;
+                playerComponent.shoot();
+            }
+        }, KeyCode.Z); // 可改为你喜欢的键
+
     }
 
     @Override
@@ -160,5 +178,24 @@ public class IWBTCSerApp extends GameApplication {
                 player.getComponent(PlayerComponent.class).die();
             }
         });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.ENEMY) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity enemy) {
+                bullet.removeFromWorld();
+                enemy.removeFromWorld();
+                spawn("explosion", enemy.getX(), enemy.getY());
+            }
+        });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.SAVEPOINT) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity checkpoint) {
+                bullet.removeFromWorld();
+
+                Point2D playerPos = player.getPosition();
+                checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
+            }
+        });
+
+
     }
 }

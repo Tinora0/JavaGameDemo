@@ -1,6 +1,7 @@
 package com.example.demo2;
 
 import com.almasb.fxgl.core.math.Vec2;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.CollidableComponent;
 import com.almasb.fxgl.entity.components.TransformComponent;
@@ -50,7 +51,6 @@ public class PlayerComponent extends Component {
     private boolean jumpHeld = false;
     //死亡相关
     private boolean isDead = false;
-    private Point2D respawnPoint = new Point2D(100, 100); // 默认重生点，可外部设置
     public int deathTime = 0;
 
     private ImageView deathOverlay;
@@ -72,9 +72,7 @@ public class PlayerComponent extends Component {
         texture.loop();  // 设置动画循环播放
     }
 
-    public void setRespawnPoint(Point2D p) {
-        this.respawnPoint = p;
-    }
+
 
     /**
      * 组件添加到实体时调用
@@ -207,8 +205,6 @@ public class PlayerComponent extends Component {
             isJumping = false;
             isFalling = false;
         }
-        // 如果刚刚落地（之前不在空中，现在在地面），播放落地效果
-        //  if (isOnGround && !wasOnGround && physics.getVelocityY() > 0) {
         // 可以在这里添加落地粒子效果或声音
         //       spawn("dust", transform.getX() + frameWidth / 2.0, transform.getY() + frameHeight);
         //  }
@@ -224,12 +220,11 @@ public class PlayerComponent extends Component {
         physics.setVelocityY(0);
 
         // 保存并禁用物理（STATIC 不受重力、不被推动）
-        // 3) 切换为 STATIC（或 KINEMATIC），彻底冻结刚体
         physics.setBodyType(BodyType.STATIC);
         physics.getBody().setLinearVelocity(new Vec2(0, 0));
         physics.getBody().setAngularVelocity(0);
 
-        // 4) 让刚体休眠，彻底断开与世界的物理更新
+        // 让刚体休眠，彻底断开与世界的物理更新
         physics.getBody().setAwake(false);
 
         entity.getComponent(CollidableComponent.class).setValue(false);
@@ -254,7 +249,6 @@ public class PlayerComponent extends Component {
             spawn("deathParticle", x, y);
         }
     }
-
     public void respawn() {
 
         // 恢复物理与碰撞
@@ -285,34 +279,42 @@ public class PlayerComponent extends Component {
         isFacingRight = false; // 设置朝向左
         physics.setVelocityX(-moveSpeed); // 设置向左的速度
     }
-
     public void moveRight() {
         isMoving = true;     // 设置移动状态
         isFacingRight = true;  // 设置朝向右
         physics.setVelocityX(moveSpeed); // 设置向右的速度
     }
-
     public void stop() {
         isMoving = false;    // 清除移动状态
         physics.setVelocityX(0); // 停止水平移动
     }
 
+    public void shoot() {
+        if (isDead) return;
+
+        double x = entity.getX() + (isFacingRight ? frameWidth : -8);
+        double y = entity.getY() + frameHeight / 2.1;
+
+        SpawnData data = new SpawnData(x, y)
+                .put("dir", isFacingRight ? 1 : -1);
+
+        spawn("bullet", data);
+        play("shoot.wav");
+    }
+
+
     public boolean isOnGround() {
         return isOnGround;
     }
-
     public boolean isMoving() {
         return isMoving;
     }
-
     public boolean isJumping() {
         return isJumping;
     }
-
     public boolean isFacingRight() {
         return isFacingRight;
     }
-
     public boolean isDead() {
         return isDead;
     }

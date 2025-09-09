@@ -1,7 +1,6 @@
 package com.example.demo2;
 
 import com.almasb.fxgl.dsl.FXGL;
-import com.almasb.fxgl.dsl.components.ExpireCleanComponent;
 import com.almasb.fxgl.entity.Entity;
 import com.almasb.fxgl.entity.EntityFactory;
 import com.almasb.fxgl.entity.SpawnData;
@@ -15,12 +14,29 @@ import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
-import javafx.util.Duration;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.getAssetLoader;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
 public class BlockFactory implements EntityFactory {
+
+    @Spawns("bullet")
+    public Entity spawnBullet(SpawnData data) {
+        int dir = data.hasKey("dir") ? data.get("dir") : 1;
+
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.KINEMATIC);
+
+        Texture tex = texture("bullet.png");
+        tex.setScaleX(0.5); // 水平缩小为原来的一半
+        tex.setScaleY(0.5); // 垂直缩小为原来的一半
+
+        return entityBuilder(data)
+                .type(EntityType.BULLET)
+                .viewWithBBox(tex) // 建议使用小图，如 8x8
+                .with(physics, new CollidableComponent(true))
+                .with(new BulletComponent(dir, 400)) // 速度可调
+                .build();
+    }
 
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data) {
@@ -119,6 +135,22 @@ public class BlockFactory implements EntityFactory {
                 .view(view)
                 .with(physics, new DeathParticleComponent())
                 .with(new CollidableComponent(true))
+                .build();
+    }
+
+    @Spawns("savepoint")
+    public Entity spawnCheckpoint(SpawnData data) {
+        Texture inactiveTex = texture("save_normal.png");
+        Texture activeTex = texture("save_activated.png");
+        activeTex.setVisible(false); // 初始为未激活
+
+        return entityBuilder(data)
+                .type(EntityType.SAVEPOINT)
+                .view(inactiveTex)
+                .view(activeTex)
+                .bbox(new HitBox("BODY", BoundingShape.box(25, 25)))
+                .with(new CollidableComponent(true))
+                .with(new SavepointComponent(inactiveTex, activeTex))
                 .build();
     }
 
