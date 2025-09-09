@@ -10,6 +10,11 @@ import com.almasb.fxgl.physics.CollisionHandler;
 import com.almasb.fxgl.physics.PhysicsWorld;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+
+import java.util.Map;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
@@ -117,7 +122,7 @@ public class IWBTCSerApp extends GameApplication {
                 // 3. 相机重新跟随
                 getGameScene().getViewport()
                         .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);// 按下时开始向左移动
-
+                FXGL.inc("deathTime", +1);
             }
         }, KeyCode.R);
     }
@@ -128,6 +133,19 @@ public class IWBTCSerApp extends GameApplication {
         MusicControl.setTranslateX(0);
         MusicControl.setTranslateY(0);
         FXGL.getGameScene().addChild(MusicControl);
+
+        Text text = new Text();
+        text.setFont(Font.font(24));
+        text.setTranslateX(750);
+        text.setTranslateY(25);
+        text.textProperty().bind(getWorldProperties().intProperty("deathTime").asString());
+        text.setFill(Color.BLACK);
+        FXGL.getGameScene().addChild(text);
+    }
+
+    @Override
+    protected void initGameVars(Map<String, Object> vars) {
+        vars.put("deathTime", 0);
     }
 
     @Override

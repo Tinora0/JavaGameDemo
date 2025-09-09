@@ -51,7 +51,7 @@ public class PlayerComponent extends Component {
     //死亡相关
     private boolean isDead = false;
     private Point2D respawnPoint = new Point2D(100, 100); // 默认重生点，可外部设置
-    private int deathTime = 0;
+    public int deathTime = 0;
 
     private ImageView deathOverlay;
 
@@ -245,10 +245,14 @@ public class PlayerComponent extends Component {
         // 禁用碰撞，避免动画期间再次触发
         entity.getComponent(CollidableComponent.class).setValue(false);
 
-        // 可选：相机震动/音效/粒子
-        // getGameScene().getViewport().shakeTranslational(10);
+
+        getGameScene().getViewport().shakeTranslational(3);
         play("death.wav");
-        spawn("death", entity.getX() + 8, entity.getY() + 8);
+        for (int i = 0; i < 200; i++) {
+            double x = entity.getX() + frameWidth / 2.0;
+            double y = entity.getY() + frameHeight / 2.0;
+            spawn("deathParticle", x, y);
+        }
     }
 
     public void respawn() {

@@ -108,12 +108,19 @@ public class BlockFactory implements EntityFactory {
                 .buildAndAttach();
     }
 
-    @Spawns("death")
-    public Entity death(SpawnData data) {
+    @Spawns("deathParticle")
+    public Entity spawnDeathParticle(SpawnData data) {
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.DYNAMIC);
+
+        Rectangle view = new Rectangle(4, 4, Color.RED);
+
         return entityBuilder(data)
-                .view(new Rectangle(12, 12, Color.CRIMSON))
-                .with(new ExpireCleanComponent(Duration.seconds(0.4))) // 0.4s 后自动销毁
+                .view(view)
+                .with(physics, new DeathParticleComponent())
+                .with(new CollidableComponent(true))
                 .build();
     }
+
 
 }
