@@ -4,6 +4,7 @@ import com.almasb.fxgl.app.GameApplication;
 import com.almasb.fxgl.app.GameSettings;
 import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.Entity;
+import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.physics.CollisionHandler;
@@ -13,28 +14,38 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.util.Duration;
 
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
 public class IWBTCSerApp extends GameApplication {
 
+    private final File saveFile = new File("saves/save.dat");
+    //
+    private String currentLevel = "level1.tmx";
     private Entity player;
     private PlayerComponent playerComponent;
-
     // 检查点
-
     private Point2D respawnPoint = new Point2D(100, 100); // 默认重生点，可外部设置
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    public File getSaveFilePath() {
+        return saveFile;
+    }
+
     public void setRespawnPoint(Point2D p) {
         this.respawnPoint = p;
-
     }
+
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -44,17 +55,14 @@ public class IWBTCSerApp extends GameApplication {
         settings.setHeight(608);
         settings.setAppIcon("cherry.png");
         settings.setMainMenuEnabled(true);
+
     }
 
     @Override
     protected void initGame() {
         getGameWorld().addEntityFactory(new BlockFactory());
-
-        Entity p = spawn("player", 100, 100);
-        player = p;
-        playerComponent = p.getComponent(PlayerComponent.class);
-        getGameScene().getViewport()
-                .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);// 按下时开始向左移动
+        loadLevel(currentLevel, null, null);
+        spawnPlayerAtRespawn();
 
         spawn("ground", 100, 150);
         spawn("ground", 125, 150);
@@ -65,6 +73,36 @@ public class IWBTCSerApp extends GameApplication {
 
     }
 
+    private void bindCameraToPlayer() {
+        getGameWorld().getEntitiesByType(EntityType.PLAYER).stream().findFirst().ifPresent(player -> {
+            getGameScene().getViewport().bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);
+            // 可选：限制相机滚动边界（根据关卡尺寸设置）
+            // getGameScene().getViewport().setBounds(0, 0, 50 * 32, 20 * 32);
+        });
+    }
+
+    public void loadLevel(String levelFile, Double spawnX, Double spawnY) {
+        this.currentLevel = levelFile;
+
+        // 切换关卡（会根据 TMX 对象层的 type 调用对应 @Spawns）
+        FXGL.setLevelFromMap(levelFile);
+
+        // 拿到玩家（地图应有一个 type="player" 的对象来触发 Factory 生成）
+        Entity player = getGameWorld().getEntitiesByType(EntityType.PLAYER)
+                .stream().findFirst()
+                .orElseGet(() -> {
+                    // 若地图里没放 player 对象，则兜底生成一个
+                    return spawn("player", new SpawnData(64, 480));
+                });
+
+        // 若提供了出生点，就覆盖玩家坐标
+        if (spawnX != null && spawnY != null) {
+            player.setPosition(spawnX, spawnY);
+        }
+
+        // 让相机重新绑定到玩家（防止切关后相机丢失跟随）
+        bindCameraToPlayer();
+    }
     @Override
     protected void initInput() {
         // 获取输入系统
@@ -120,18 +158,9 @@ public class IWBTCSerApp extends GameApplication {
         input.addAction(new UserAction("Respawn") {
             @Override
             protected void onActionBegin() {
-                // 1. 移除旧实体
                 playerComponent.respawn();
                 player.removeFromWorld();
-
-                // 2. spawn 新玩家
-                player = spawn("player",
-                        respawnPoint.getX(),
-                        respawnPoint.getY());
-                playerComponent = player.getComponent(PlayerComponent.class);
-                // 3. 相机重新跟随
-                getGameScene().getViewport()
-                        .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);// 按下时开始向左移动
+                spawnPlayerAtRespawn();
                 FXGL.inc("deathTime", +1);
             }
         }, KeyCode.R);
@@ -159,11 +188,33 @@ public class IWBTCSerApp extends GameApplication {
         text.textProperty().bind(getWorldProperties().intProperty("deathTime").asString());
         text.setFill(Color.BLACK);
         FXGL.getGameScene().addChild(text);
+
+        Text totalTimeText = new Text("总游玩时间：00:00:00");
+        totalTimeText.setFont(Font.font(18));
+        totalTimeText.setFill(Color.DARKGREEN);
+        totalTimeText.setTranslateX(600);
+        totalTimeText.setTranslateY(75);
+        FXGL.getGameScene().addChild(totalTimeText);
+// 每秒更新一次
+        FXGL.getGameTimer().runAtInterval(() -> {
+            int stored = FXGL.geti("totalPlayTime");
+            int current = (int) FXGL.getGameTimer().getNow();
+            int total = stored + current;
+
+            int hours = total / 3600;
+            int minutes = (total % 3600) / 60;
+            int secs = total % 60;
+
+            totalTimeText.setText(String.format("总游玩时间：%02d:%02d:%02d", hours, minutes, secs));
+        }, Duration.seconds(1));
+
+
     }
 
     @Override
     protected void initGameVars(Map<String, Object> vars) {
         vars.put("deathTime", 0);
+        vars.put("totalPlayTime", 0);
     }
 
     @Override
@@ -195,7 +246,59 @@ public class IWBTCSerApp extends GameApplication {
                 checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
             }
         });
+    }
 
+    public void spawnPlayerAtRespawn() {
+        if (player != null) {
+            player.removeFromWorld();
+        }
+        player = spawn("player", respawnPoint.getX(), respawnPoint.getY());
+        playerComponent = player.getComponent(PlayerComponent.class);
+        getGameScene().getViewport()
+                .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);
+    }
 
+    public void saveCheckpoint(Point2D playerPos) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(saveFile))) {
+            Path saveDir = Paths.get("saves");
+            if (!Files.exists(saveDir)) {
+                Files.createDirectories(saveDir);
+            }
+            writer.write(playerPos.getX() + "," + playerPos.getY());
+            writer.newLine();
+            writer.write("deathTime=" + FXGL.geti("deathTime"));
+            writer.newLine();
+            int totalPlayTime = FXGL.geti("totalPlayTime") + (int) FXGL.getGameTimer().getNow();
+            writer.write("playTime=" + totalPlayTime);
+            System.out.println("✅ 存档成功：" + playerPos);
+        } catch (IOException e) {
+            System.out.println("❌ 存档失败：" + e.getMessage());
+        }
+    }
+
+    public void loadCheckpoint() {
+        if (!saveFile.exists()) return;
+        try (BufferedReader reader = new BufferedReader(new FileReader(saveFile))) {
+            String[] pos = reader.readLine().split(",");
+            respawnPoint = new Point2D(Double.parseDouble(pos[0]), Double.parseDouble(pos[1]));
+
+            String deathLine = reader.readLine();
+            if (deathLine != null && deathLine.startsWith("deathTime=")) {
+                FXGL.set("deathTime", Integer.parseInt(deathLine.split("=")[1]));
+            }
+
+            String playTimeLine = reader.readLine();
+            if (playTimeLine != null && playTimeLine.startsWith("playTime=")) {
+                FXGL.set("totalPlayTime", Integer.parseInt(playTimeLine.split("=")[1]));
+            } else {
+                FXGL.set("totalPlayTime", 0);
+            }
+
+            System.out.println("📦 已加载存档点：" + respawnPoint);
+        } catch (Exception e) {
+            System.out.println("⚠️ 存档加载失败：" + e.getMessage());
+        }
     }
 }
+
+

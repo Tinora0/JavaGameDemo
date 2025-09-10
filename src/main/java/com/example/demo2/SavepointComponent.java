@@ -26,6 +26,7 @@ public class SavepointComponent extends Component {
 
         // 设置玩家重生点
         ((IWBTCSerApp) FXGL.getApp()).setRespawnPoint(playerPos);
+        ((IWBTCSerApp) FXGL.getApp()).saveCheckpoint(playerPos);
 
 
         // 2 秒后恢复为未激活状态

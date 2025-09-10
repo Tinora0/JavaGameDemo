@@ -154,5 +154,23 @@ public class BlockFactory implements EntityFactory {
                 .build();
     }
 
+    @Spawns("portal")
+    public Entity spawnPortal(SpawnData data) {
+        String targetLevel = data.get("targetLevel");
+
+        // 从 Map<String,Object> 里取出，值可能是 Float/Integer
+        double spawnX = ((Number) data.get("spawnX")).doubleValue();
+        double spawnY = ((Number) data.get("spawnY")).doubleValue();
+
+        Texture tex = texture("warp.png");
+
+        return entityBuilder(data)
+                .type(EntityType.TP)
+                .viewWithBBox(tex)
+                .with(new CollidableComponent(true))
+                .with(new PortalComponent(targetLevel, spawnX, spawnY))
+                .build();
+    }
+
 
 }
