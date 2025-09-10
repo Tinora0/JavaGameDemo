@@ -36,6 +36,7 @@ public class PlayerComponent extends Component {
     private final AnimatedTexture texture;       // 动画纹理，用于渲染动画
     private final BodyType prevBodyType = BodyType.DYNAMIC;
     private final double savedGravityScale = 1.0;
+    public int deathTime = 0;
     // 组件依赖：FXGL 会自动注入这些组件
     TransformComponent transform;  // 处理实体位置、旋转和缩放
     PhysicsComponent physics;      // 处理物理模拟和碰撞
@@ -51,8 +52,6 @@ public class PlayerComponent extends Component {
     private boolean jumpHeld = false;
     //死亡相关
     private boolean isDead = false;
-    public int deathTime = 0;
-
     private ImageView deathOverlay;
 
     public PlayerComponent() {
@@ -71,7 +70,6 @@ public class PlayerComponent extends Component {
         texture = new AnimatedTexture(animIdle);
         texture.loop();  // 设置动画循环播放
     }
-
 
 
     /**
@@ -249,6 +247,7 @@ public class PlayerComponent extends Component {
             spawn("deathParticle", x, y);
         }
     }
+
     public void respawn() {
 
         // 恢复物理与碰撞
@@ -279,11 +278,13 @@ public class PlayerComponent extends Component {
         isFacingRight = false; // 设置朝向左
         physics.setVelocityX(-moveSpeed); // 设置向左的速度
     }
+
     public void moveRight() {
         isMoving = true;     // 设置移动状态
         isFacingRight = true;  // 设置朝向右
         physics.setVelocityX(moveSpeed); // 设置向右的速度
     }
+
     public void stop() {
         isMoving = false;    // 清除移动状态
         physics.setVelocityX(0); // 停止水平移动
@@ -306,15 +307,19 @@ public class PlayerComponent extends Component {
     public boolean isOnGround() {
         return isOnGround;
     }
+
     public boolean isMoving() {
         return isMoving;
     }
+
     public boolean isJumping() {
         return isJumping;
     }
+
     public boolean isFacingRight() {
         return isFacingRight;
     }
+
     public boolean isDead() {
         return isDead;
     }

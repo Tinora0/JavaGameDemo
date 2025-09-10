@@ -5,7 +5,7 @@ import com.almasb.fxgl.physics.PhysicsComponent;
 
 public class DeathParticleComponent extends Component {
 
-    private double lifeTime = 1.5; // 粒子存活时间（秒）
+    private final double lifeTime = 1.5; // 粒子存活时间（秒）
     private double time = 0;
 
     @Override
@@ -22,6 +22,7 @@ public class DeathParticleComponent extends Component {
                     entity.getComponent(PhysicsComponent.class).setVelocityY(vy);
                 });
     }
+
     @Override
     public void onUpdate(double tpf) {
         time += tpf;
