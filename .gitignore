@@ -1,13 +1,4 @@
-
-/logs/
+*.log
 /target/
-target/classes/module-info.class
-target/classes/com/example/demo2/BlockFactory.class
-target/classes/com/example/demo2/EntityType.class
-target/classes/com/example/demo2/IWBTCSerApp.class
-target/classes/com/example/demo2/IWBTCSerApp$1.class
-target/classes/com/example/demo2/IWBTCSerApp$2.class
-target/classes/com/example/demo2/IWBTCSerApp$3.class
-target/classes/com/example/demo2/IWBTCSerApp$4.class
-target/classes/com/example/demo2/IWBTCSerApp$5.class
-target/classes/com/example/demo2/PlayerComponent.class
+/.vscode/*
+!.vscode/settings.json
