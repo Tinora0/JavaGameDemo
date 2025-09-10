@@ -15,7 +15,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
 
 public class BlockFactory implements EntityFactory {
 
@@ -40,18 +41,31 @@ public class BlockFactory implements EntityFactory {
 
     @Spawns("player")
     public Entity spawnPlayer(SpawnData data) {
+        // 1. 构建玩家实体
         PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.DYNAMIC); // 动态物体，受物理影响
-        Texture texture = getAssetLoader().loadTexture("playerSpriteSheet.png");
-        return FXGL.entityBuilder(data)
+        physics.setBodyType(BodyType.DYNAMIC);
+
+        Entity pl = entityBuilder(data)
                 .type(EntityType.PLAYER)
                 .bbox(new HitBox(new Point2D(0, 0),
                         BoundingShape.box(25, 24)))
-                .with(physics) // 添加物理组件
-                .with(new CollidableComponent(true)) // 添加可碰撞组件
-                .with(new PlayerComponent()) //添加玩家组件
-                .build();
+                .with(physics,
+                        new CollidableComponent(true),
+                        new PlayerComponent())
+                .build();  // build() 后由 FXGL 自动 attach
+
+        // 2) 更新主类的 player 引用
+        IWBTCSerApp app = (IWBTCSerApp) FXGL.getApp();
+        app.setPlayer(pl);
+
+        // 3) 立即绑定摄像机到这个玩家
+        FXGL.getGameScene().getViewport()
+                .bindToEntity(pl,
+                        FXGL.getAppWidth() / 2.0,
+                        FXGL.getAppHeight() / 2.0);
+        return pl;
     }
+
 
     @Spawns("ground")
     public Entity ground(SpawnData data) {
@@ -62,7 +76,7 @@ public class BlockFactory implements EntityFactory {
                 .viewWithBBox("ground.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .buildAndAttach();
+                .build();
     }
 
     @Spawns("platform")
@@ -74,7 +88,7 @@ public class BlockFactory implements EntityFactory {
                 .viewWithBBox("platform.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .buildAndAttach();
+                .build();
     }
 
     @Spawns("spikeup")
@@ -97,7 +111,7 @@ public class BlockFactory implements EntityFactory {
                         BoundingShape.polygon(points)))
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .buildAndAttach();
+                .build();
     }
 
     @Spawns("block")
@@ -109,7 +123,7 @@ public class BlockFactory implements EntityFactory {
                 .viewWithBBox("block.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .buildAndAttach();
+                .build();
     }
 
     @Spawns("soil")
@@ -121,7 +135,7 @@ public class BlockFactory implements EntityFactory {
                 .viewWithBBox("soil.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .buildAndAttach();
+                .build();
     }
 
     @Spawns("deathParticle")
@@ -148,7 +162,8 @@ public class BlockFactory implements EntityFactory {
                 .type(EntityType.SAVEPOINT)
                 .view(inactiveTex)
                 .view(activeTex)
-                .bbox(new HitBox("BODY", BoundingShape.box(25, 25)))
+                .zIndex(-10)
+                .bbox(new HitBox("BODY", BoundingShape.box(32, 32)))
                 .with(new CollidableComponent(true))
                 .with(new SavepointComponent(inactiveTex, activeTex))
                 .build();

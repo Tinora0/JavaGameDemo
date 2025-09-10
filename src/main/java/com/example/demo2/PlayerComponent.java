@@ -14,8 +14,11 @@ import javafx.geometry.Point2D;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.util.Duration;
+import javafx.util.Pair;
 
-import static com.almasb.fxgl.dsl.FXGL.*;
+import java.util.function.Function;
+
+import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
 
 public class PlayerComponent extends Component {
@@ -181,19 +184,35 @@ public class PlayerComponent extends Component {
     private void checkGroundStatus() {
         // 记录之前的地面状态，用于检测状态变化
         boolean wasOnGround = isOnGround;
+        Point2D pos = transform.getPosition();
+        double yOff = frameHeight + 1;  // 从脚底稍微往下发射
 
-        // 从玩家底部中心向下发射一条短射线
-        // 射线起点：玩家位置 + 宽度/2（水平中心），高度（底部）
-        Point2D rayStart = transform.getPosition().add(frameWidth / 2.0, frameHeight);
-        // 射线终点：起点向下延伸5像素
-        Point2D rayEnd = rayStart.add(0, 9);
+        Point2D leftStart = pos.add(2, yOff);
+        Point2D centerStart = pos.add(frameWidth / 2, yOff);
+        Point2D rightStart = pos.add(frameWidth - 2, yOff);
 
-        // 执行射线检测，检查是否与地面碰撞
-        isOnGround = getPhysicsWorld()
-                .raycast(rayStart, rayEnd)
-                .getEntity() // 获取碰撞到的实体
-                .filter(e -> e.isType(EntityType.BLOCK)) // 过滤出地面实体
-                .isPresent(); // 如果存在地面实体，返回true
+        Point2D leftEnd = leftStart.add(0, 5);
+        Point2D centerEnd = centerStart.add(0, 5);
+        Point2D rightEnd = rightStart.add(0, 5);
+
+        // 封装成一个方法：一根射线检测是否击中地面
+        Function<Pair<Point2D, Point2D>, Boolean> hitGround = pair ->
+                getPhysicsWorld()
+                        .raycast(pair.getKey(), pair.getValue())
+                        .getEntity()
+                        .filter(e ->
+                                e.isType(EntityType.BLOCK)
+                                        || e.isType(EntityType.PLATFORM)
+
+                        )
+                        .isPresent();
+
+        // 三根只要一根返回 true，就判定在地面上
+        boolean leftHit = hitGround.apply(new Pair<>(leftStart, leftEnd));
+        boolean centerHit = hitGround.apply(new Pair<>(centerStart, centerEnd));
+        boolean rightHit = hitGround.apply(new Pair<>(rightStart, rightEnd));
+
+        isOnGround = leftHit || centerHit || rightHit;
         if (isOnGround) {
             // 刚落地时（wasOnGround=false → isOnGround=true）才执行一次
             if (!wasOnGround) {
@@ -241,11 +260,13 @@ public class PlayerComponent extends Component {
 
         getGameScene().getViewport().shakeTranslational(3);
         play("death.wav");
-        for (int i = 0; i < 200; i++) {
-            double x = entity.getX() + frameWidth / 2.0;
-            double y = entity.getY() + frameHeight / 2.0;
-            spawn("deathParticle", x, y);
-        }
+        double x = entity.getX() + frameWidth / 2.0;
+        double y = entity.getY() + frameHeight / 2.0;
+        getGameTimer().runOnceAfter(() -> {
+            for (int i = 0; i < 200; i++) {
+                spawn("deathParticle", x, y);
+            }
+        }, Duration.seconds(0));
     }
 
     public void respawn() {

@@ -46,6 +46,10 @@ public class IWBTCSerApp extends GameApplication {
         this.respawnPoint = p;
     }
 
+    public void setPlayer(Entity pl) {
+        this.player = pl;
+        this.playerComponent = pl.getComponent(PlayerComponent.class);
+    }
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -58,8 +62,15 @@ public class IWBTCSerApp extends GameApplication {
 
     }
 
+    protected void initAssets() {
+        // 把常用贴图缓存到内存，下次再 loadTexture 就是内存读取
+        getAssetLoader().loadTexture("ground.png");
+        getAssetLoader().loadTexture("playerSpriteSheet.png");
+
+    }
     @Override
     protected void initGame() {
+        initAssets();
         getGameWorld().addEntityFactory(new BlockFactory());
         loadLevel(currentLevel, null, null);
         spawnPlayerAtRespawn();
@@ -97,6 +108,7 @@ public class IWBTCSerApp extends GameApplication {
 
         // 若提供了出生点，就覆盖玩家坐标
         if (spawnX != null && spawnY != null) {
+            respawnPoint = new Point2D(spawnX, spawnY);
             player.setPosition(spawnX, spawnY);
         }
 

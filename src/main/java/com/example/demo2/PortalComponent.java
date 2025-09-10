@@ -4,6 +4,11 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.component.Required;
 import com.almasb.fxgl.entity.components.CollidableComponent;
+import javafx.geometry.Point2D;
+import javafx.util.Duration;
+
+import static com.almasb.fxgl.dsl.FXGL.onCollisionBegin;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.getGameTimer;
 
 @Required(CollidableComponent.class)
 public class PortalComponent extends Component {
@@ -18,18 +23,20 @@ public class PortalComponent extends Component {
         this.spawnY = spawnY;
     }
 
+
     @Override
     public void onAdded() {
         entity.getComponent(CollidableComponent.class).setValue(true);
-    }
 
-    @Override
-    public void onUpdate(double tpf) {
-        FXGL.getGameWorld().getEntitiesByType(EntityType.PLAYER).forEach(player -> {
-            if (player.isColliding(entity)) {
+        onCollisionBegin(EntityType.PLAYER, EntityType.TP, (player, tp) -> {
+            getGameTimer().runOnceAfter(() -> {
+                // 1) 先设置下一个关卡的重生坐标
+                IWBTCSerApp app = (IWBTCSerApp) FXGL.getApp();
+                app.setRespawnPoint(new Point2D(spawnX, spawnY));
+
+                // 2) 切换关卡
                 FXGL.setLevelFromMap(targetLevel);
-                player.setPosition(spawnX, spawnY);
-            }
+            }, Duration.seconds(0));
         });
     }
 }
