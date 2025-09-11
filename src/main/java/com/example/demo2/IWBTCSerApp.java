@@ -8,6 +8,7 @@ import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.input.Input;
 import com.almasb.fxgl.input.UserAction;
 import com.almasb.fxgl.physics.CollisionHandler;
+import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.PhysicsWorld;
 import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
@@ -71,19 +72,27 @@ public class IWBTCSerApp extends GameApplication {
         initAssets();
         getGameWorld().addEntityFactory(new BlockFactory());
         loadLevel(currentLevel, null, null);
-        //  loadCheckpoint();
         spawnPlayerAtRespawn();
-
         spawn("ground", 100, 150);
         spawn("ground", 125, 150);
         spawn("ground", 150, 150);
         spawn("ground", 175, 150);
         spawn("spikeup", 200, 150);
         spawn("savepoint", 85, 100);
-
+        spawn("platform", new SpawnData(250, 150)
+                .put("speed", 120.0)
+                .put("dir", "right")
+        );
+        spawn("platform", new SpawnData(150, 80)
+                .put("speed", 1.0)
+                .put("dir", "right")
+        );
+        spawn("soil", 350, 150);
         //添加敌人
         spawn("enemy", 300, 100);
+
         spawn("bird",300,150);
+
     }
 
     private void bindCameraToPlayer() {
@@ -230,32 +239,74 @@ public class IWBTCSerApp extends GameApplication {
     @Override
     protected void initPhysics() {
         PhysicsWorld physics = getPhysicsWorld();
+        //平台碰撞
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.PLATFORM) {
+            @Override
+            protected void onCollision(Entity player, Entity platform) {
+                var pbb = player.getBoundingBoxComponent();
+                pbb.getMaxYWorld();
 
+                var phys = player.getComponentOptional(PhysicsComponent.class);
+                phys.map(PhysicsComponent::getVelocityY);
+
+                // 条件：玩家从上往下、且玩家的底部在平台顶部附近
+                // 像素/秒，判定“向下运动”的阈值
+                // 容差（像素）
+
+            }
+
+        });
+        // 平台与方块：反弹（翻转速度方向）
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLATFORM, EntityType.BLOCK) {
+            @Override
+            protected void onCollisionBegin(Entity platform, Entity block) {
+                var comp = platform.getComponent(MovingPlatformComponent.class);
+                comp.reverseX();
+                comp.reverseY();
+            }
+
+        });
         // 死亡(刺，敌人)
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.SPIKE) {
             @Override
             protected void onCollisionBegin(Entity player, Entity spike) {
-                // 只在第一次碰撞时调用 die()
                 player.getComponent(PlayerComponent.class).die();
             }
         });
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
             @Override
             protected void onCollisionBegin(Entity player, Entity enemy) {
-                // 只在第一次碰撞时调用 die()
                 player.getComponent(PlayerComponent.class).die();
+                resetAllEnemies();
+            }
+        });
+        //加载游戏传送门
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.TPLOAD) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity enemy) {
+                if (player.getComponent(PhysicsComponent.class).getVelocityX() != 0 ||
+                        player.getComponent(PhysicsComponent.class).getVelocityY() != 0) {
+
+                    loadCheckpoint();
+                }
             }
         });
         //子弹击杀敌人
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.ENEMY) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity enemy) {
-                bullet.removeFromWorld();
                 enemy.removeFromWorld();
+                bullet.removeFromWorld();
+                System.out.println("杀");
             }
         });
-
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BLOCK) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity block) {
+                bullet.removeFromWorld();
+            }
+        });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.PLATFORM) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity block) {
                 bullet.removeFromWorld();
@@ -325,6 +376,7 @@ public class IWBTCSerApp extends GameApplication {
                 bird.removeFromWorld();
             }
         });
+
     }
 
     private void resetAllEnemies() {
@@ -344,8 +396,6 @@ public class IWBTCSerApp extends GameApplication {
     }
 
     public void spawnPlayerAtRespawn() {
-
-
         if (player != null) {
             player.removeFromWorld();
         }
@@ -354,6 +404,7 @@ public class IWBTCSerApp extends GameApplication {
         player = spawn("player", respawnPoint.getX(), respawnPoint.getY());
         playerComponent = player.getComponent(PlayerComponent.class);
         resetAllEnemies();
+
         getGameScene().getViewport()
                 .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);
     }
