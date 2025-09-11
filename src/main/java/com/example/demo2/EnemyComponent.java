@@ -2,8 +2,6 @@ package com.example.demo2;
 
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
-import com.almasb.fxgl.physics.box2d.dynamics.Body;
-import com.almasb.fxgl.core.math.Vec2;
 
 public class EnemyComponent extends Component {
     private PhysicsComponent physics;
@@ -13,46 +11,59 @@ public class EnemyComponent extends Component {
     private double startX;
     private double startY;
     private boolean isPhysicsInitialized = false; // 物理初始化标志
-
+    private static final double EPSILON = 0.5;
+    private double patrolCooldown = 0; //
     @Override
     public void onAdded() {
-        startX = entity.getX(); // 仅在此处记录初始位置
-        startY = entity.getY();
-
         physics = entity.getComponent(PhysicsComponent.class);
-        startX = entity.getX();
-        startY = entity.getY();
 
         physics.setOnPhysicsInitialized(() -> {
-            Body body = physics.getBody();
-            body.setGravityScale(0); // 禁用重力
+            startX = entity.getX();
+            startY = entity.getY();
+            physics.getBody().setGravityScale(0);
             physics.setVelocityX(direction * speed);
             isPhysicsInitialized = true;
+
+            System.out.printf("[onAdded]  初始位置=(%.2f, %.2f) 速度=%.2f 方向=%d%n",
+                    startX, startY, physics.getVelocityX(), direction);
         });
     }
 
     @Override
     public void onUpdate(double tpf) {
-        if (isPhysicsInitialized) {
-            // 边界检测与转向逻辑
-            if (entity.getX() - startX > patrolRange || entity.getX() < startX) {
-                direction *= -1;
-                physics.setVelocityX(direction * speed);
-            }
+        if (!isPhysicsInitialized) return;
+
+        double dx = entity.getX() - startX;
+        boolean hitBoundary = Math.abs(dx) >= patrolRange;
+
+        System.out.printf("[onUpdate] Enemy posX=%.2f dx=%.2f patrolRange=%.2f hitBoundary=%b velX=%.2f dir=%d%n",
+                entity.getX(), dx, patrolRange, hitBoundary, physics.getVelocityX(), direction);
+
+        if (hitBoundary) {
+            direction *= -1;
+            physics.setVelocityX(direction * speed);
+            System.out.printf("[onUpdate] Enemy 触发反向 新方向=%d 新速度=%.2f%n",
+                    direction, physics.getVelocityX());
         }
     }
 
-    // 重置敌人状态
     public void reset() {
         entity.setPosition(startX, startY);
         direction = 1;
-        if (isPhysicsInitialized) {
-            physics.setVelocityX(direction * speed);
-            physics.getBody().setLinearVelocity(new Vec2(direction * speed, 0));
-            physics.getBody().setAwake(true);
-            physics.getBody().setGravityScale(0);
+
+        if (physics == null) {
+            physics = entity.getComponent(PhysicsComponent.class);
         }
+
+        physics.getBody().setAwake(true);
+        physics.getBody().setGravityScale(0);
+        physics.setVelocityX(direction * speed);
+        isPhysicsInitialized = true;
+
+        System.out.printf("[reset] Enemy 重置到=(%.2f, %.2f) 方向=%d 速度=%.2f%n",
+                entity.getX(), entity.getY(), direction, physics.getVelocityX());
     }
+
 
     // 设置巡逻范围（从地图配置读取）
     public void setPatrolRange(double range) {

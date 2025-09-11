@@ -72,19 +72,14 @@ public class BlockFactory implements EntityFactory {
 
     @Spawns("platform")
     public Entity platform(SpawnData data) {
-        double w = data.get("width");
-        double h = data.get("height");
+
 
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.STATIC);
 
-        Texture tex = texture("platform.png");
-        tex.setFitWidth(w);
-        tex.setFitHeight(h);
-
         return FXGL.entityBuilder(data)
                 .type(EntityType.PLATFORM)
-                .viewWithBBox(tex)
+                .viewWithBBox("platform.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
                 .build();
@@ -225,7 +220,8 @@ public class BlockFactory implements EntityFactory {
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.DYNAMIC);
+
+        physics.setBodyType(BodyType.KINEMATIC);
 
         // 获取巡逻范围
         double patrolRange = 100.0; // 默认值

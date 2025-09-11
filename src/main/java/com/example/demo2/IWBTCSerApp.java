@@ -32,7 +32,7 @@ public class IWBTCSerApp extends GameApplication {
     private Entity player;
     private PlayerComponent playerComponent;
     // 检查点
-    private Point2D respawnPoint = new Point2D(100, 100); // 默认重生点，可外部设置
+    private Point2D respawnPoint = new Point2D(100, 100);
 
     public static void main(String[] args) {
         launch(args);
@@ -46,7 +46,7 @@ public class IWBTCSerApp extends GameApplication {
         this.player = pl;
         this.playerComponent = pl.getComponent(PlayerComponent.class);
     }
-    // 保存当前帧的调试线引用
+
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -79,10 +79,10 @@ public class IWBTCSerApp extends GameApplication {
         spawn("ground", 150, 150);
         spawn("ground", 175, 150);
         spawn("spikeup", 200, 150);
-        spawn("savepoint", 225, 100);
+        spawn("savepoint", 85, 100);
 
         //添加敌人
-        spawn("enemy", 300, 150);
+        spawn("enemy", 300, 100);
 
     }
 
@@ -252,7 +252,20 @@ public class IWBTCSerApp extends GameApplication {
             protected void onCollisionBegin(Entity bullet, Entity enemy) {
                 bullet.removeFromWorld();
                 enemy.removeFromWorld();
-                spawn("explosion", enemy.getX(), enemy.getY());
+            }
+        });
+
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BLOCK) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity block) {
+                bullet.removeFromWorld();
+            }
+        });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.SPIKE) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity spike) {
+                bullet.removeFromWorld();
+
             }
         });
         //子弹激活传送点
@@ -296,12 +309,14 @@ public class IWBTCSerApp extends GameApplication {
 
     private void resetAllEnemies() {
         FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).forEach(enemy -> {
-            enemy.getComponent(EnemyComponent.class).reset();
+            if (enemy.isActive()) {
+                enemy.getComponent(EnemyComponent.class).reset();
+            }
         });
     }
 
     public void spawnPlayerAtRespawn() {
-        resetAllEnemies();
+
 
         if (player != null) {
             player.removeFromWorld();
@@ -310,6 +325,7 @@ public class IWBTCSerApp extends GameApplication {
         FXGL.inc("deathTime", +1);
         player = spawn("player", respawnPoint.getX(), respawnPoint.getY());
         playerComponent = player.getComponent(PlayerComponent.class);
+        resetAllEnemies();
         getGameScene().getViewport()
                 .bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);
     }
