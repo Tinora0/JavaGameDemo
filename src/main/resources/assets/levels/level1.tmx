@@ -21,6 +21,8 @@
     <object id="15" type="ground" x="416" y="512" width="32" height="32"/>
     <object id="16" type="ground" x="448" y="512" width="32" height="32"/>
     <object id="17" type="ground" x="480" y="512" width="32" height="32"/>
+    <object id="18" type="boostLeft" x="300" y="510" width="32" height="32"/>
+    <object id="19" type="ice" x="192" y="510" width="32" height="32"/>
 
     <!-- 平台 -->
     <object id="20" type="platform" x="300" y="400" width="32" height="32"/>
@@ -28,7 +30,6 @@
     <object id="22" type="platform" x="364" y="400" width="32" height="32"/>
 
     <!-- 上尖刺 -->
-    <object id="30" type="spikeup" x="200" y="480" width="32" height="32"/>
 
     <!-- 存档点 -->
     <object id="40" type="savepoint" x="128" y="480" width="25" height="25"/>
