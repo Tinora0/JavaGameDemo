@@ -90,6 +90,9 @@ public class IWBTCSerApp extends GameApplication {
         spawn("soil", 350, 150);
         //添加敌人
         spawn("enemy", 300, 100);
+
+        spawn("bird",300,150);
+
     }
 
     private void bindCameraToPlayer() {
@@ -343,14 +346,51 @@ public class IWBTCSerApp extends GameApplication {
         //      double x= playerComponent.physics.getVelocityX();
         //     playerComponent.physics.setVelocityX(x+300);
         // });
+        // 玩家与敌人碰撞时触发死亡
+        getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity enemy) {
+                // 玩家死亡
+                player.getComponent(PlayerComponent.class).die();
+                // 重置所有敌人状态
+                resetAllEnemies();
+            }
+        });
 
+        // 玩家与鸟碰撞时触发死亡
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.BIRD) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity bird) {
+                // 玩家死亡
+                player.getComponent(PlayerComponent.class).die();
+                // 重置所有敌人状态
+                resetAllEnemies();
+            }
+        });
+
+        // 子弹与鸟碰撞
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BIRD) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity bird) {
+                bullet.removeFromWorld();
+                bird.removeFromWorld();
+            }
+        });
 
     }
 
     private void resetAllEnemies() {
+        // 重置普通敌人
         FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).forEach(enemy -> {
             if (enemy.isActive()) {
                 enemy.getComponent(EnemyComponent.class).reset();
+            }
+        });
+
+        // 重置鸟敌人
+        FXGL.getGameWorld().getEntitiesByType(EntityType.BIRD).forEach(bird -> {
+            if (bird.isActive()) {
+                bird.getComponent(BirdComponent.class).reset();
             }
         });
     }

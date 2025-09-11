@@ -251,4 +251,30 @@ public class BlockFactory implements EntityFactory {
                 .with(enemyComponent)
                 .build();
     }
+
+    @Spawns("bird")
+    public Entity spawnBird(SpawnData data) {
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.KINEMATIC);
+
+        // 获取巡逻范围
+        double patrolRange = 100.0; // 默认值
+        if (data.hasKey("patrolRange")) {
+            Object value = data.get("patrolRange");
+            if (value instanceof Number) {
+                patrolRange = ((Number) value).doubleValue();
+            }
+        }
+
+        // 将巡逻范围传递给BirdComponent
+        BirdComponent birdComponent = new BirdComponent();
+        birdComponent.setPatrolRange(patrolRange);
+
+        return entityBuilder(data)
+                .type(EntityType.BIRD)
+                .bbox(new HitBox(BoundingShape.box(17, 38))) // 使用鸟的尺寸
+                .with(physics, new CollidableComponent(true))
+                .with(birdComponent)
+                .build();
+    }
 }
