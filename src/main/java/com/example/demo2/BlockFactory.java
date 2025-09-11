@@ -197,5 +197,30 @@ public class BlockFactory implements EntityFactory {
                 .build();
     }
 
+    @Spawns("enemy")
+    public Entity spawnEnemy(SpawnData data) {
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.DYNAMIC);
 
+        // 获取巡逻范围
+        double patrolRange = 100.0; // 默认值
+        if (data.hasKey("patrolRange")) {
+            Object value = data.get("patrolRange");
+            if (value instanceof Number) {
+                patrolRange = ((Number) value).doubleValue();
+            }
+        }
+
+        // 将巡逻范围传递给EnemyComponent
+        EnemyComponent enemyComponent = new EnemyComponent();
+        enemyComponent.setPatrolRange(patrolRange);
+
+        Texture tex = texture("enemy.png");
+        return entityBuilder(data)
+                .type(EntityType.ENEMY)
+                .viewWithBBox(tex)
+                .with(physics, new CollidableComponent(true))
+                .with(enemyComponent)
+                .build();
+    }
 }
