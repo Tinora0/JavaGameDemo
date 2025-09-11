@@ -1,3 +1,4 @@
-386.0,486.0
-deathTime=5
-playTime=39
+level=level1.tmx
+pos=293.0,487.0
+deathTime=3
+playTime=34

@@ -4,7 +4,6 @@ import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.component.Required;
 import com.almasb.fxgl.entity.components.CollidableComponent;
-import javafx.geometry.Point2D;
 import javafx.util.Duration;
 
 import static com.almasb.fxgl.dsl.FXGL.onCollisionBegin;
@@ -32,10 +31,7 @@ public class PortalComponent extends Component {
             getGameTimer().runOnceAfter(() -> {
                 // 1) 先设置下一个关卡的重生坐标
                 IWBTCSerApp app = (IWBTCSerApp) FXGL.getApp();
-                app.setRespawnPoint(new Point2D(spawnX, spawnY));
-
-                // 2) 切换关卡
-                FXGL.setLevelFromMap(targetLevel);
+                app.loadLevel(targetLevel, spawnX, spawnY);
             }, Duration.seconds(0));
         });
     }

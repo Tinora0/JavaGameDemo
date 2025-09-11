@@ -40,7 +40,6 @@ public class PlayerComponent extends Component {
     private final AnimatedTexture texture;       // 动画纹理，用于渲染动画
     private final BodyType prevBodyType = BodyType.DYNAMIC;
     private final double savedGravityScale = 1.0;
-    public int deathTime = 0;
     // 组件依赖：FXGL 会自动注入这些组件
     TransformComponent transform;  // 处理实体位置、旋转和缩放
     PhysicsComponent physics;      // 处理物理模拟和碰撞
@@ -292,10 +291,7 @@ public class PlayerComponent extends Component {
         isFalling = false;
         isOnGround = false;
         canDoubleJump = true;
-        deathTime++;
 
-        getGameScene().getViewport()
-                .bindToEntity(entity, getAppWidth() / 2.0, getAppHeight() / 2.0);
     }
 
     public void moveLeft() {
