@@ -11,8 +11,6 @@ public class EnemyComponent extends Component {
     private double startX;
     private double startY;
     private boolean isPhysicsInitialized = false; // 物理初始化标志
-    private static final double EPSILON = 0.5;
-    private double patrolCooldown = 0; //
     @Override
     public void onAdded() {
         physics = entity.getComponent(PhysicsComponent.class);
@@ -24,8 +22,6 @@ public class EnemyComponent extends Component {
             physics.setVelocityX(direction * speed);
             isPhysicsInitialized = true;
 
-            System.out.printf("[onAdded]  初始位置=(%.2f, %.2f) 速度=%.2f 方向=%d%n",
-                    startX, startY, physics.getVelocityX(), direction);
         });
     }
 
@@ -36,8 +32,6 @@ public class EnemyComponent extends Component {
         double dx = entity.getX() - startX;
         boolean hitBoundary = Math.abs(dx) >= patrolRange;
 
-        System.out.printf("[onUpdate] Enemy posX=%.2f dx=%.2f patrolRange=%.2f hitBoundary=%b velX=%.2f dir=%d%n",
-                entity.getX(), dx, patrolRange, hitBoundary, physics.getVelocityX(), direction);
 
         if (hitBoundary) {
             direction *= -1;
@@ -60,8 +54,6 @@ public class EnemyComponent extends Component {
         physics.setVelocityX(direction * speed);
         isPhysicsInitialized = true;
 
-        System.out.printf("[reset] Enemy 重置到=(%.2f, %.2f) 方向=%d 速度=%.2f%n",
-                entity.getX(), entity.getY(), direction, physics.getVelocityX());
     }
 
 
