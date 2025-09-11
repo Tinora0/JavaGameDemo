@@ -5,23 +5,9 @@
     <object id="1" name="playerStart" type="player" x="64" y="480" width="32" height="32"/>
 
     <!-- 地面（多块） -->
-    <object id="2" type="ground" x="0" y="512" width="32" height="32"/>
-    <object id="3" type="ground" x="32" y="512" width="32" height="32"/>
-    <object id="4" type="ground" x="64" y="512" width="32" height="32"/>
-    <object id="5" type="ground" x="96" y="512" width="32" height="32"/>
-    <object id="6" type="ground" x="128" y="512" width="32" height="32"/>
-    <object id="7" type="ground" x="160" y="512" width="32" height="32"/>
-    <object id="8" type="ground" x="192" y="512" width="32" height="32"/>
-    <object id="9" type="ground" x="224" y="512" width="32" height="32"/>
-    <object id="10" type="ground" x="256" y="512" width="32" height="32"/>
-    <object id="11" type="ground" x="288" y="512" width="32" height="32"/>
-    <object id="12" type="ground" x="320" y="512" width="32" height="32"/>
-    <object id="13" type="ground" x="352" y="512" width="32" height="32"/>
-    <object id="14" type="ground" x="384" y="512" width="32" height="32"/>
-    <object id="15" type="ground" x="416" y="512" width="32" height="32"/>
-    <object id="16" type="ground" x="448" y="512" width="32" height="32"/>
-    <object id="17" type="ground" x="480" y="512" width="32" height="32"/>
-    <object id="18" type="boostLeft" x="300" y="510" width="32" height="32"/>
+    <object id="2" type="ground" x="0" y="512" width="480" height="32"/>
+
+    <object id="18" type="boostLeft" x="300" y="510" width="320" height="32"/>
     <object id="19" type="ice" x="192" y="510" width="32" height="32"/>
 
     <!-- 平台 -->
