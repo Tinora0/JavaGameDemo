@@ -50,6 +50,7 @@ public class IWBTCSerApp extends GameApplication {
         this.player = pl;
         this.playerComponent = pl.getComponent(PlayerComponent.class);
     }
+    // 保存当前帧的调试线引用
 
     @Override
     protected void initSettings(GameSettings settings) {
@@ -68,6 +69,7 @@ public class IWBTCSerApp extends GameApplication {
         getAssetLoader().loadTexture("playerSpriteSheet.png");
 
     }
+
     @Override
     protected void initGame() {
         initAssets();
@@ -115,6 +117,7 @@ public class IWBTCSerApp extends GameApplication {
         // 让相机重新绑定到玩家（防止切关后相机丢失跟随）
         bindCameraToPlayer();
     }
+
     @Override
     protected void initInput() {
         // 获取输入系统
@@ -233,7 +236,7 @@ public class IWBTCSerApp extends GameApplication {
     protected void initPhysics() {
         PhysicsWorld physics = getPhysicsWorld();
 
-        // 玩家与尖刺碰撞时触发死亡
+        // 死亡(刺，敌人)
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.SPIKE) {
             @Override
             protected void onCollisionBegin(Entity player, Entity spike) {
@@ -241,6 +244,14 @@ public class IWBTCSerApp extends GameApplication {
                 player.getComponent(PlayerComponent.class).die();
             }
         });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity enemy) {
+                // 只在第一次碰撞时调用 die()
+                player.getComponent(PlayerComponent.class).die();
+            }
+        });
+        //子弹击杀敌人
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.ENEMY) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity enemy) {
@@ -249,6 +260,7 @@ public class IWBTCSerApp extends GameApplication {
                 spawn("explosion", enemy.getX(), enemy.getY());
             }
         });
+        //子弹激活传送点
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.SAVEPOINT) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity checkpoint) {
@@ -258,9 +270,27 @@ public class IWBTCSerApp extends GameApplication {
                 checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
             }
         });
+        // 进入右向加速带 → 持续向右推
+        //   FXGL.onCollision(EntityType.PLAYER, EntityType.BOOSTRIGHT, (player, boost) -> {
+        //       double x= playerComponent.physics.getVelocityX();
+        //       playerComponent.physics.setVelocityX(x+300);
+        //   });
+        //   FXGL.onCollisionEnd(EntityType.PLAYER, EntityType.BOOSTRIGHT, (player, boost) -> {
+        //      double x= playerComponent.physics.getVelocityX();
+        //      playerComponent.physics.setVelocityX(x-300);
+        //   });
+        //   // 进入左向加速带 → 持续向左推
+        //   FXGL.onCollisionBegin(EntityType.PLAYER, EntityType.BOOSTLEFT, (player, boost) -> {
+        //      double x= playerComponent.physics.getVelocityX();
+        //   });
+        // FXGL.onCollisionEnd(EntityType.PLAYER, EntityType.BOOSTLEFT, (player, boost) -> {
+        //      double x= playerComponent.physics.getVelocityX();
+        //     playerComponent.physics.setVelocityX(x+300);
+        // });
     }
 
     public void spawnPlayerAtRespawn() {
+
         if (player != null) {
             player.removeFromWorld();
         }

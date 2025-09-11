@@ -1,6 +1,7 @@
 package com.example.demo2;
 
 import com.almasb.fxgl.core.math.Vec2;
+import com.almasb.fxgl.dsl.FXGL;
 import com.almasb.fxgl.entity.SpawnData;
 import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.entity.components.CollidableComponent;
@@ -133,7 +134,8 @@ public class PlayerComponent extends Component {
                 physics.setVelocityY(-doubleJumpSpeed); // 向上
                 jumpTime = 0;
                 canDoubleJump = false;
-                play("jump2.wav");
+                FXGL.getAudioPlayer().playSound(FXGL.getAssetLoader().loadSound("jump2.wav"));
+
             }
         }
     }
@@ -146,9 +148,6 @@ public class PlayerComponent extends Component {
         isJumping = false;
     }
 
-    /**
-     * 根据玩家当前状态更新动画
-     */
     private void updateAnimation() {
         // 根据状态选择适当的动画
         if (isJumping) {
@@ -182,18 +181,19 @@ public class PlayerComponent extends Component {
     }
 
     private void checkGroundStatus() {
+
         // 记录之前的地面状态，用于检测状态变化
         boolean wasOnGround = isOnGround;
         Point2D pos = transform.getPosition();
-        double yOff = frameHeight + 1;  // 从脚底稍微往下发射
+        double yOff = frameHeight - 1;  // 从脚底稍微往下发射
 
         Point2D leftStart = pos.add(2, yOff);
         Point2D centerStart = pos.add(frameWidth / 2, yOff);
         Point2D rightStart = pos.add(frameWidth - 2, yOff);
 
-        Point2D leftEnd = leftStart.add(0, 5);
-        Point2D centerEnd = centerStart.add(0, 5);
-        Point2D rightEnd = rightStart.add(0, 5);
+        Point2D leftEnd = leftStart.add(0, 8);
+        Point2D centerEnd = centerStart.add(0, 8);
+        Point2D rightEnd = rightStart.add(0, 8);
 
         // 封装成一个方法：一根射线检测是否击中地面
         Function<Pair<Point2D, Point2D>, Boolean> hitGround = pair ->
@@ -203,6 +203,9 @@ public class PlayerComponent extends Component {
                         .filter(e ->
                                 e.isType(EntityType.BLOCK)
                                         || e.isType(EntityType.PLATFORM)
+                                        || e.isType(EntityType.BOOSTLEFT)
+                                        || e.isType(EntityType.BOOSTRIGHT)
+                                        || e.isType(EntityType.ICE)
 
                         )
                         .isPresent();
@@ -213,6 +216,7 @@ public class PlayerComponent extends Component {
         boolean rightHit = hitGround.apply(new Pair<>(rightStart, rightEnd));
 
         isOnGround = leftHit || centerHit || rightHit;
+
         if (isOnGround) {
             // 刚落地时（wasOnGround=false → isOnGround=true）才执行一次
             if (!wasOnGround) {
@@ -324,22 +328,6 @@ public class PlayerComponent extends Component {
         play("shoot.wav");
     }
 
-
-    public boolean isOnGround() {
-        return isOnGround;
-    }
-
-    public boolean isMoving() {
-        return isMoving;
-    }
-
-    public boolean isJumping() {
-        return isJumping;
-    }
-
-    public boolean isFacingRight() {
-        return isFacingRight;
-    }
 
     public boolean isDead() {
         return isDead;

@@ -10,6 +10,7 @@ import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
+import com.almasb.fxgl.physics.box2d.dynamics.FixtureDef;
 import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
@@ -44,11 +45,10 @@ public class BlockFactory implements EntityFactory {
         // 1. 构建玩家实体
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
-
         Entity pl = entityBuilder(data)
                 .type(EntityType.PLAYER)
-                .bbox(new HitBox(new Point2D(0, 0),
-                        BoundingShape.box(25, 24)))
+                .bbox(new HitBox(new Point2D(0, 3),
+                        BoundingShape.box(21, 21)))
                 .with(physics,
                         new CollidableComponent(true),
                         new PlayerComponent())
@@ -65,7 +65,6 @@ public class BlockFactory implements EntityFactory {
                         FXGL.getAppHeight() / 2.0);
         return pl;
     }
-
 
     @Spawns("ground")
     public Entity ground(SpawnData data) {
@@ -113,7 +112,6 @@ public class BlockFactory implements EntityFactory {
                 .with(new CollidableComponent(true))
                 .build();
     }
-
     @Spawns("block")
     public Entity block(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
@@ -125,7 +123,6 @@ public class BlockFactory implements EntityFactory {
                 .with(new CollidableComponent(true))
                 .build();
     }
-
     @Spawns("soil")
     public Entity soil(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
@@ -138,12 +135,39 @@ public class BlockFactory implements EntityFactory {
                 .build();
     }
 
+    @Spawns("ice")
+    public Entity ice(SpawnData data) {
+        PhysicsComponent physics = new PhysicsComponent();
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.setDensity(0.0001f);
+        physics.setFixtureDef(fixtureDef);
+        return FXGL.entityBuilder()
+                .type(EntityType.ICE)
+                .with(new CollidableComponent(true), physics)
+                .viewWithBBox(new Rectangle(100, 40, Color.BLUE))
+                .build();
+    }
+
+    @Spawns("boostLeft")
+    public Entity spawnBoostLeft(SpawnData data) {
+        return FXGL.entityBuilder()
+                .type(EntityType.BOOSTLEFT)
+                .with(new CollidableComponent(true))
+                .viewWithBBox(new Rectangle(100, 40, Color.ORANGE))
+                .build();
+    }
+
+    public Entity spawnBoostRight(SpawnData data) {
+        return FXGL.entityBuilder()
+                .type(EntityType.BOOSTRIGHT)
+                .viewWithBBox(new Rectangle(100, 40, Color.ORANGE))
+                .build();
+    }
     @Spawns("deathParticle")
     public Entity spawnDeathParticle(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.DYNAMIC);
-
-        Rectangle view = new Rectangle(4, 4, Color.RED);
+        Rectangle view = new Rectangle(2, 2, Color.RED);
 
         return entityBuilder(data)
                 .view(view)
