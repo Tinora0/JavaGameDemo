@@ -4,13 +4,13 @@ import com.almasb.fxgl.entity.component.Component;
 import com.almasb.fxgl.physics.PhysicsComponent;
 
 public class EnemyComponent extends Component {
-    private PhysicsComponent physics;
-    private int direction = 1; // 1:右移, -1:左移
-    private final double speed = 80;
-    private double patrolRange = 100.0; // 巡逻范围
-    private double startX;
-    private double startY;
-    private boolean isPhysicsInitialized = false; // 物理初始化标志
+    protected PhysicsComponent physics;
+    protected int direction = 1; // 1:右移, -1:左移
+    protected final double speed = 80;
+    protected double patrolRange = 100.0; // 巡逻范围
+    protected double startX;
+    protected double startY;
+    protected boolean isPhysicsInitialized = false; // 物理初始化标志
     @Override
     public void onAdded() {
         physics = entity.getComponent(PhysicsComponent.class);
