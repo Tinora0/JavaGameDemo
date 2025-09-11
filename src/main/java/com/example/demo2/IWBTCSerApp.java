@@ -82,6 +82,9 @@ public class IWBTCSerApp extends GameApplication {
         spawn("spikeup", 200, 150);
         spawn("savepoint", 225, 100);
 
+        //添加敌人
+        spawn("enemy", 300, 150);
+
     }
 
     private void bindCameraToPlayer() {
@@ -258,9 +261,27 @@ public class IWBTCSerApp extends GameApplication {
                 checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
             }
         });
+        // 玩家与敌人碰撞时触发死亡
+        getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity enemy) {
+                // 玩家死亡
+                player.getComponent(PlayerComponent.class).die();
+                // 重置所有敌人状态
+                resetAllEnemies();
+            }
+        });
+    }
+
+    private void resetAllEnemies() {
+        FXGL.getGameWorld().getEntitiesByType(EntityType.ENEMY).forEach(enemy -> {
+            enemy.getComponent(EnemyComponent.class).reset();
+        });
     }
 
     public void spawnPlayerAtRespawn() {
+        resetAllEnemies();
+
         if (player != null) {
             player.removeFromWorld();
         }
