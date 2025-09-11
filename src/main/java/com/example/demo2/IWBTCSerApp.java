@@ -71,7 +71,7 @@ public class IWBTCSerApp extends GameApplication {
         initAssets();
         getGameWorld().addEntityFactory(new BlockFactory());
         loadLevel(currentLevel, null, null);
-        loadCheckpoint();
+        //  loadCheckpoint();
         spawnPlayerAtRespawn();
 
         spawn("ground", 100, 150);

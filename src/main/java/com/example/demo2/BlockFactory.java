@@ -10,7 +10,6 @@ import com.almasb.fxgl.physics.BoundingShape;
 import com.almasb.fxgl.physics.HitBox;
 import com.almasb.fxgl.physics.PhysicsComponent;
 import com.almasb.fxgl.physics.box2d.dynamics.BodyType;
-import com.almasb.fxgl.physics.box2d.dynamics.FixtureDef;
 import com.almasb.fxgl.texture.Texture;
 import javafx.geometry.Point2D;
 import javafx.scene.paint.Color;
@@ -132,19 +131,6 @@ public class BlockFactory implements EntityFactory {
                 .viewWithBBox("soil.png")
                 .with(physics)
                 .with(new CollidableComponent(true))
-                .build();
-    }
-
-    @Spawns("ice")
-    public Entity ice(SpawnData data) {
-        PhysicsComponent physics = new PhysicsComponent();
-        FixtureDef fixtureDef = new FixtureDef();
-        fixtureDef.setDensity(0.0001f);
-        physics.setFixtureDef(fixtureDef);
-        return FXGL.entityBuilder()
-                .type(EntityType.ICE)
-                .with(new CollidableComponent(true), physics)
-                .viewWithBBox(new Rectangle(100, 40, Color.BLUE))
                 .build();
     }
 
