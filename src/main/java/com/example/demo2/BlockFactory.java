@@ -89,17 +89,17 @@ public class BlockFactory implements EntityFactory {
         int dir = data.hasKey("dir") ? data.get("dir") : 1;
 
         PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.KINEMATIC);
-
-
+        physics.setBodyType(BodyType.DYNAMIC);
         Texture tex = texture("bullet.png");
         tex.setScaleX(0.5); // 水平缩小为原来的一半
         tex.setScaleY(0.5); // 垂直缩小为原来的一半
 
         return entityBuilder(data)
                 .type(EntityType.BULLET)
-                .viewWithBBox(new Rectangle(8, 8, Color.YELLOW)).with(physics, new CollidableComponent(true))
-                .with(new BulletComponent(dir, 150)) // 速度可调
+                .viewWithBBox(tex)
+                .with(physics, new CollidableComponent(true))
+                .with(new BulletComponent(dir, 150))
+                // 速度可调
                 .build();
     }
 
@@ -246,7 +246,7 @@ public class BlockFactory implements EntityFactory {
         Texture tex = texture("enemy.png");
         return entityBuilder(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(new Rectangle(32, 32, Color.RED))
+                .viewWithBBox(tex)
                 .with(physics, new CollidableComponent(true))
                 .with(enemyComponent)
                 .build();

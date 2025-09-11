@@ -303,6 +303,12 @@ public class IWBTCSerApp extends GameApplication {
                 bullet.removeFromWorld();
             }
         });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.PLATFORM) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity block) {
+                bullet.removeFromWorld();
+            }
+        });
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.SPIKE) {
             @Override
             protected void onCollisionBegin(Entity bullet, Entity spike) {
