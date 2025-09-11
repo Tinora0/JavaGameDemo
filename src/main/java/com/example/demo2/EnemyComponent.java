@@ -36,8 +36,7 @@ public class EnemyComponent extends Component {
         if (hitBoundary) {
             direction *= -1;
             physics.setVelocityX(direction * speed);
-            System.out.printf("[onUpdate] Enemy 触发反向 新方向=%d 新速度=%.2f%n",
-                    direction, physics.getVelocityX());
+
         }
     }
 

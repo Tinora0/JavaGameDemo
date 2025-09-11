@@ -70,21 +70,6 @@ public class BlockFactory implements EntityFactory {
         return createTiledEntity(data, "ground.png", EntityType.BLOCK);
     }
 
-    @Spawns("platform")
-    public Entity platform(SpawnData data) {
-
-
-        PhysicsComponent physics = new PhysicsComponent();
-        physics.setBodyType(BodyType.STATIC);
-
-        return FXGL.entityBuilder(data)
-                .type(EntityType.PLATFORM)
-                .viewWithBBox("platform.png")
-                .with(physics)
-                .with(new CollidableComponent(true))
-                .build();
-    }
-
     @Spawns("ice")
     public Entity ice(SpawnData data) {
         return createTiledEntity(data, "block.png", EntityType.PLATFORM);
@@ -106,15 +91,15 @@ public class BlockFactory implements EntityFactory {
         PhysicsComponent physics = new PhysicsComponent();
         physics.setBodyType(BodyType.KINEMATIC);
 
+
         Texture tex = texture("bullet.png");
         tex.setScaleX(0.5); // 水平缩小为原来的一半
         tex.setScaleY(0.5); // 垂直缩小为原来的一半
 
         return entityBuilder(data)
                 .type(EntityType.BULLET)
-                .viewWithBBox(tex) // 建议使用小图，如 8x8
-                .with(physics, new CollidableComponent(true))
-                .with(new BulletComponent(dir, 400)) // 速度可调
+                .viewWithBBox(new Rectangle(8, 8, Color.YELLOW)).with(physics, new CollidableComponent(true))
+                .with(new BulletComponent(dir, 150)) // 速度可调
                 .build();
     }
 
@@ -143,7 +128,6 @@ public class BlockFactory implements EntityFactory {
                         FXGL.getAppHeight() / 2.0);
         return pl;
     }
-
 
     @Spawns("spikeup")
     public Entity spikeup(SpawnData data) {
@@ -182,6 +166,20 @@ public class BlockFactory implements EntityFactory {
                 .build();
     }
 
+    @Spawns("platform")
+    public Entity spawnPlatform(SpawnData data) {
+
+        double speed = data.hasKey("speed") ? data.get("speed") : 100.0;
+        String dir = data.hasKey("dir") ? data.get("dir") : "right";
+        PhysicsComponent physics = new PhysicsComponent();
+        physics.setBodyType(BodyType.KINEMATIC);
+        return FXGL.entityBuilder(data)
+                .type(EntityType.PLATFORM)
+                .viewWithBBox("platform.png")
+                .with(new CollidableComponent(true), physics)
+                .with(new MovingPlatformComponent(speed, dir))
+                .build();
+    }
     @Spawns("savepoint")
     public Entity spawnCheckpoint(SpawnData data) {
         Texture inactiveTex = texture("save_normal.png");
@@ -217,6 +215,15 @@ public class BlockFactory implements EntityFactory {
                 .build();
     }
 
+    @Spawns("portalLoad")
+    public Entity spawnPortalLoad(SpawnData data) {
+        Texture tex = texture("warp.png");
+        return entityBuilder(data)
+                .type(EntityType.TPLOAD)
+                .viewWithBBox(tex)
+                .with(new CollidableComponent(true))
+                .build();
+    }
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
@@ -239,7 +246,7 @@ public class BlockFactory implements EntityFactory {
         Texture tex = texture("enemy.png");
         return entityBuilder(data)
                 .type(EntityType.ENEMY)
-                .viewWithBBox(tex)
+                .viewWithBBox(new Rectangle(32, 32, Color.RED))
                 .with(physics, new CollidableComponent(true))
                 .with(enemyComponent)
                 .build();
