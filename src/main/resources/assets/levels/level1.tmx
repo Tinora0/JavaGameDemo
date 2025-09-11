@@ -1,59 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="left-up" width="50" height="40" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="94">
- <objectgroup id="7" name="对象层 1">
-  <object id="39" type="spikeup" x="256" y="64" width="64" height="32"/>
-  <object id="40" type="spikeup" x="448" y="160" width="32" height="32"/>
-  <object id="41" type="spikeup" x="640" y="64" width="96" height="32"/>
-  <object id="42" type="spikeup" x="960.667" y="225.333" width="64" height="32"/>
-  <object id="43" type="spikeup" x="736" y="544" width="64" height="32"/>
-  <object id="44" type="spikeup" x="1472.67" y="576.667" width="64" height="32"/>
-  <object id="45" type="spikeup" x="256" y="576" width="64" height="32"/>
-  <object id="46" type="spikeup" x="0" y="960" width="64" height="32"/>
-  <object id="47" type="spikeup" x="1184" y="991.333" width="64" height="32"/>
-  <object id="48" type="spikeup" x="1280" y="928" width="64" height="32"/>
-  <object id="49" type="spikeup" x="1280" y="257.333" width="96" height="32"/>
-  <object id="50" type="spikeup" x="895.333" y="542.667" width="96" height="32"/>
-  <object id="51" type="spikeup" x="352.667" y="1024" width="96" height="32"/>
-  <object id="52" type="spikeup" x="545.333" y="1024.67" width="96" height="32"/>
-  <object id="53" type="spikeup" x="736.667" y="864.667" width="96" height="32"/>
-  <object id="54" type="spikeup" x="833.333" y="1056.67" width="96" height="32"/>
-  <object id="55" type="spikeup" x="1089.33" y="1119.33" width="96" height="32"/>
-  <object id="56" type="spikeup" x="1311.33" y="450" width="32" height="32"/>
-  <object id="57" type="spikeup" x="320" y="481.333" width="32" height="32"/>
-  <object id="58" type="spikeup" x="352" y="448.667" width="32" height="32"/>
-  <object id="59" type="spikeup" x="159.333" y="610" width="32" height="32"/>
-  <object id="60" type="spikeup" x="96" y="672" width="32" height="32"/>
-  <object id="61" type="spikeup" x="1248.34" y="961.333" width="32" height="32"/>
-  <object id="62" type="spikeup" x="1344.67" y="896.667" width="32" height="32"/>
-  <object id="63" type="spikeup" x="448" y="961.333" width="96" height="32"/>
-  <object id="64" type="spikeup" x="801.333" y="447.333" width="64" height="32"/>
-  <object id="65" type="spikeup" x="1154" y="192.667" width="32" height="96"/>
-  <object id="66" type="spikeup" x="1216" y="480.667" width="32" height="64"/>
-  <object id="67" type="spikeup" x="511.333" y="450" width="32" height="64"/>
-  <object id="68" type="spikeup" x="224" y="960.667" width="32" height="96"/>
-  <object id="69" type="ground" x="96" y="64">
-   <polygon points="-95.3333,1.33333 -96.6667,226 1058,224.667 1058,95.3333 928.667,97.3333 929.333,192.667 863.333,192 863.333,96 766.667,96 766,32.6667 448,32.6667 448.667,127.333 352,128 352.667,64 287.333,64 286.667,32.6667 162,32 161.333,-2"/>
-  </object>
-  <object id="70" type="ground" x="1152" y="288" width="320" height="64"/>
-  <object id="73" type="ground" x="1539.33" y="290" width="59.3333" height="64"/>
-  <object id="75" type="ground" x="1599.33" y="450">
-   <polygon points="0,0 1.33333,285.333 -1375.33,286.667 -1376,318.667 -1536,319.333 -1535.33,254 -1470.67,254.667 -1471.33,190.667 -1408,190.667 -1408,126 -1345.33,126 -1342.67,157.333 -1280,158 -1279.33,125.333 -1216,126 -1215.33,62.6667 -1056.67,62 -1056,-2 -960.667,0.666667 -959.333,127.333 -608,125.333 -608,-1.33333 -511.333,0 -510.667,94.6667 -352,95.3333 -350.667,30.6667 -256,30 -255.333,-0.666667 -127.333,-1.33333 -126.667,158 -61.3333,158 -62,-0.666667"/>
-  </object>
-  <object id="76" type="ground" x="0.666667" y="993.333">
-   <polygon points="0,-1.33333 -0.666667,286.667 1599.33,286.667 1600,-33.3333 1376,-33.3333 1376,30.6667 1279.33,32 1279.33,94.6667 1183.33,94.6667 1184,158.667 1087.33,158.667 1086.67,-34 1022.67,-33.3333 1024,30 928.667,29.3333 928,94.6667 832.667,94.6667 832,-64 736.667,-64.6667 736,62 224.667,63.3333 224,-64 62.6667,-64 62.6667,-2"/>
-  </object>
- </objectgroup>
- <objectgroup id="8" name="对象层 2">
-  <object id="83" type="block" x="800" y="416" width="64" height="32"/>
-  <object id="84" type="block" x="320" y="416">
-   <polygon points="0,0 -0.666667,64 31.3333,64 31.3333,31.3333 64.6667,31.3333 64.6667,0"/>
-  </object>
-  <object id="86" type="block" x="736" y="833" width="96" height="32"/>
-  <object id="87" type="block" x="448" y="928" width="96" height="32"/>
-  <object id="88" type="block" x="864" y="991.333" width="32" height="32"/>
-  <object id="89" type="block" x="1120" y="1056" width="32" height="32"/>
-  <object id="90" type="block" x="1185" y="960">
-   <polygon points="0,0 0,31.3333 62.6667,31.3333 62.6667,0 94.6667,-0.666667 94,-32.6667 158.667,-32 159.333,-64 188.667,-64.6667 190,-94.6667 126.667,-95.3333 126.667,-64.6667 62.6667,-64.6667 63.3333,-32 31.3333,-32 31.3333,0"/>
+<map version="1.9" tiledversion="1.9.2" orientation="orthogonal" renderorder="right-down" width="50" height="20" tilewidth="32" tileheight="32" infinite="0" nextlayerid="2" nextobjectid="100">
+  <objectgroup id="1" name="Objects">
+    <!-- 玩家出生点 -->
+    <object id="1" name="playerStart" type="player" x="64" y="480" width="32" height="32"/>
+
+    <!-- 地面（多块） -->
+    <object id="2" type="ground" x="0" y="512" width="480" height="32"/>
+
+    <object id="18" type="boostLeft" x="300" y="510" width="320" height="32"/>
+    <object id="19" type="ice" x="192" y="510" width="32" height="32"/>
+
+    <!-- 平台 -->
+    <object id="20" type="platform" x="300" y="400" width="32" height="32"/>
+    <object id="21" type="platform" x="332" y="400" width="32" height="32"/>
+    <object id="22" type="platform" x="364" y="400" width="32" height="32"/>
+
+    <!-- 上尖刺 -->
+
+    <!-- 存档点 -->
+    <object id="40" type="savepoint" x="128" y="480" width="25" height="25"/>
+
+    <!-- 传送门：去 level2.tmx，抵达坐标(96, 448) -->
+    <object id="50" name="PortalToLevel2" type="portal" x="460" y="480" width="32" height="32">
+      <properties>
+        <property name="targetLevel" value="level2.tmx"/>
+        <property name="spawnX" type="float" value="96"/>
+        <property name="spawnY" type="float" value="448"/>
+      </properties>
   </object>
  </objectgroup>
 
