@@ -187,7 +187,7 @@ public class PlayerComponent extends Component {
         double yOff = frameHeight - 1;  // 从脚底稍微往下发射
 
         Point2D leftStart = pos.add(2, yOff);
-        Point2D centerStart = pos.add(frameWidth / 2, yOff);
+        Point2D centerStart = pos.add((double) frameWidth / 2, yOff);
         Point2D rightStart = pos.add(frameWidth - 2, yOff);
 
         Point2D leftEnd = leftStart.add(0, 8);

@@ -16,12 +16,11 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-import static com.almasb.fxgl.dsl.FXGLForKtKt.entityBuilder;
-import static com.almasb.fxgl.dsl.FXGLForKtKt.texture;
+import static com.almasb.fxgl.dsl.FXGLForKtKt.*;
 
 public class BlockFactory implements EntityFactory {
 
-    private Entity createTiledEntity(SpawnData data, String textureName, EntityType type) {
+    private Entity createTiledEntity(SpawnData data, String textureName) {
         double w = data.hasKey("width") ? ((Number) data.get("width")).doubleValue() : 32;
         double h = data.hasKey("height") ? ((Number) data.get("height")).doubleValue() : 32;
 
@@ -46,7 +45,7 @@ public class BlockFactory implements EntityFactory {
 
         // 直接用 w×h 生成碰撞箱，不依赖 Pane 的大小
         return FXGL.entityBuilder(data)
-                .type(type)
+                .type(EntityType.BLOCK)
                 .view(pane) // 只负责显示
                 .bbox(new HitBox(BoundingShape.box(w, h))) // 碰撞箱
                 .with(physics)
@@ -57,33 +56,20 @@ public class BlockFactory implements EntityFactory {
 
     @Spawns("block")
     public Entity block(SpawnData data) {
-        return createTiledEntity(data, "block.png", EntityType.BLOCK);
+        return createTiledEntity(data, "block.png");
     }
 
     @Spawns("soil")
     public Entity soil(SpawnData data) {
-        return createTiledEntity(data, "soil.png", EntityType.BLOCK);
+        return createTiledEntity(data, "soil.png");
     }
 
     @Spawns("ground")
     public Entity ground(SpawnData data) {
-        return createTiledEntity(data, "ground.png", EntityType.BLOCK);
+        return createTiledEntity(data, "ground.png");
     }
 
-    @Spawns("ice")
-    public Entity ice(SpawnData data) {
-        return createTiledEntity(data, "block.png", EntityType.PLATFORM);
-    }
 
-    @Spawns("boostLeft")
-    public Entity boostLeft(SpawnData data) {
-        return createTiledEntity(data, "block.png", EntityType.PLATFORM);
-    }
-
-    @Spawns("boostRight")
-    public Entity boostRight(SpawnData data) {
-        return createTiledEntity(data, "block.png", EntityType.PLATFORM);
-    }
     @Spawns("bullet")
     public Entity spawnBullet(SpawnData data) {
         int dir = data.hasKey("dir") ? data.get("dir") : 1;
@@ -180,6 +166,7 @@ public class BlockFactory implements EntityFactory {
                 .with(new MovingPlatformComponent(speed, dir))
                 .build();
     }
+
     @Spawns("savepoint")
     public Entity spawnCheckpoint(SpawnData data) {
         Texture inactiveTex = texture("save_normal.png");
@@ -224,10 +211,10 @@ public class BlockFactory implements EntityFactory {
                 .with(new CollidableComponent(true))
                 .build();
     }
+
     @Spawns("enemy")
     public Entity spawnEnemy(SpawnData data) {
         PhysicsComponent physics = new PhysicsComponent();
-
         physics.setBodyType(BodyType.KINEMATIC);
 
         // 获取巡逻范围
@@ -258,7 +245,7 @@ public class BlockFactory implements EntityFactory {
         physics.setBodyType(BodyType.KINEMATIC);
 
         // 获取巡逻范围
-        double patrolRange = 100.0; // 默认值
+        double patrolRange = 400.0; // 默认值
         if (data.hasKey("patrolRange")) {
             Object value = data.get("patrolRange");
             if (value instanceof Number) {
@@ -272,9 +259,42 @@ public class BlockFactory implements EntityFactory {
 
         return entityBuilder(data)
                 .type(EntityType.BIRD)
-                .bbox(new HitBox(BoundingShape.box(17, 38))) // 使用鸟的尺寸
+                .bbox(new HitBox(BoundingShape.box(17, 38)))
                 .with(physics, new CollidableComponent(true))
                 .with(birdComponent)
                 .build();
+    }
+
+
+    @Spawns("trap")
+    public Entity newTrap(SpawnData data) {
+        String direction = data.get("direction");
+        double distance = data.get("distance");
+        double speed = data.get("speed");
+
+        return entityBuilder(data)
+                .type(EntityType.TRAP)
+                .viewWithBBox(texture("spike.png"))
+                .with(new TrapComponent(direction, distance, speed))
+                .build();
+    }
+
+    @Spawns("trigger")
+    public Entity newTrigger(SpawnData data) {
+        // trapId 是对象层属性，用来找到对应的陷阱
+        double w = data.hasKey("width") ? ((Number) data.get("width")).doubleValue() : 32;
+        double h = data.hasKey("height") ? ((Number) data.get("height")).doubleValue() : 32;
+        String trapId = data.get("trapId");
+        Entity trapEntity = getGameWorld().getEntitiesByType(EntityType.TRAP)
+                .stream()
+                .filter(e -> trapId.equals(e.getString("id")))
+                .findFirst()
+                .orElse(null);
+
+        return entityBuilder(data)
+                .type(EntityType.TRIGGER)
+                .bbox(BoundingShape.box(w, h))
+                .build();
+
     }
 }

@@ -64,7 +64,6 @@ public class IWBTCSerApp extends GameApplication {
         // 把常用贴图缓存到内存，下次再 loadTexture 就是内存读取
         getAssetLoader().loadTexture("ground.png");
         getAssetLoader().loadTexture("playerSpriteSheet.png");
-
     }
 
     @Override
@@ -96,11 +95,7 @@ public class IWBTCSerApp extends GameApplication {
     }
 
     private void bindCameraToPlayer() {
-        getGameWorld().getEntitiesByType(EntityType.PLAYER).stream().findFirst().ifPresent(player -> {
-            getGameScene().getViewport().bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0);
-            // 可选：限制相机滚动边界（根据关卡尺寸设置）
-            // getGameScene().getViewport().setBounds(0, 0, 50 * 32, 20 * 32);
-        });
+        getGameWorld().getEntitiesByType(EntityType.PLAYER).stream().findFirst().ifPresent(player -> getGameScene().getViewport().bindToEntity(player, getAppWidth() / 2.0, getAppHeight() / 2.0));
     }
 
     public void loadLevel(String levelFile, Double spawnX, Double spawnY) {
@@ -127,6 +122,7 @@ public class IWBTCSerApp extends GameApplication {
         // 让相机重新绑定到玩家（防止切关后相机丢失跟随）
         bindCameraToPlayer();
     }
+
 
     @Override
     protected void initInput() {
@@ -193,7 +189,7 @@ public class IWBTCSerApp extends GameApplication {
                 if (playerComponent.isDead()) return;
                 playerComponent.shoot();
             }
-        }, KeyCode.Z); // 可改为你喜欢的键
+        }, KeyCode.Z);
 
     }
 
@@ -214,7 +210,6 @@ public class IWBTCSerApp extends GameApplication {
         totalTimeText.setTranslateX(0);
         totalTimeText.setTranslateY(25);
         FXGL.getGameScene().addChild(totalTimeText);
-// 每秒更新一次
         FXGL.getGameTimer().runAtInterval(() -> {
             int stored = FXGL.geti("totalPlayTime");
             int current = (int) FXGL.getGameTimer().getNow();
@@ -239,23 +234,7 @@ public class IWBTCSerApp extends GameApplication {
     @Override
     protected void initPhysics() {
         PhysicsWorld physics = getPhysicsWorld();
-        //平台碰撞
-        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.PLATFORM) {
-            @Override
-            protected void onCollision(Entity player, Entity platform) {
-                var pbb = player.getBoundingBoxComponent();
-                pbb.getMaxYWorld();
 
-                var phys = player.getComponentOptional(PhysicsComponent.class);
-                phys.map(PhysicsComponent::getVelocityY);
-
-                // 条件：玩家从上往下、且玩家的底部在平台顶部附近
-                // 像素/秒，判定“向下运动”的阈值
-                // 容差（像素）
-
-            }
-
-        });
         // 平台与方块：反弹（翻转速度方向）
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLATFORM, EntityType.BLOCK) {
             @Override
@@ -264,7 +243,6 @@ public class IWBTCSerApp extends GameApplication {
                 comp.reverseX();
                 comp.reverseY();
             }
-
         });
         // 死亡(刺，敌人)
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.SPIKE) {
@@ -276,6 +254,13 @@ public class IWBTCSerApp extends GameApplication {
         physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
             @Override
             protected void onCollisionBegin(Entity player, Entity enemy) {
+                player.getComponent(PlayerComponent.class).die();
+                resetAllEnemies();
+            }
+        });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.BIRD) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity bird) {
                 player.getComponent(PlayerComponent.class).die();
                 resetAllEnemies();
             }
@@ -297,7 +282,13 @@ public class IWBTCSerApp extends GameApplication {
             protected void onCollisionBegin(Entity bullet, Entity enemy) {
                 enemy.removeFromWorld();
                 bullet.removeFromWorld();
-                System.out.println("杀");
+            }
+        });
+        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BIRD) {
+            @Override
+            protected void onCollisionBegin(Entity bullet, Entity bird) {
+                bird.removeFromWorld();
+                bullet.removeFromWorld();
             }
         });
         physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BLOCK) {
@@ -327,53 +318,6 @@ public class IWBTCSerApp extends GameApplication {
 
                 Point2D playerPos = player.getPosition();
                 checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
-            }
-        });
-        // 进入右向加速带 → 持续向右推
-        //   FXGL.onCollision(EntityType.PLAYER, EntityType.BOOSTRIGHT, (player, boost) -> {
-        //       double x= playerComponent.physics.getVelocityX();
-        //       playerComponent.physics.setVelocityX(x+300);
-        //   });
-        //   FXGL.onCollisionEnd(EntityType.PLAYER, EntityType.BOOSTRIGHT, (player, boost) -> {
-        //      double x= playerComponent.physics.getVelocityX();
-        //      playerComponent.physics.setVelocityX(x-300);
-        //   });
-        //   // 进入左向加速带 → 持续向左推
-        //   FXGL.onCollisionBegin(EntityType.PLAYER, EntityType.BOOSTLEFT, (player, boost) -> {
-        //      double x= playerComponent.physics.getVelocityX();
-        //   });
-        // FXGL.onCollisionEnd(EntityType.PLAYER, EntityType.BOOSTLEFT, (player, boost) -> {
-        //      double x= playerComponent.physics.getVelocityX();
-        //     playerComponent.physics.setVelocityX(x+300);
-        // });
-        // 玩家与敌人碰撞时触发死亡
-        getPhysicsWorld().addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.ENEMY) {
-            @Override
-            protected void onCollisionBegin(Entity player, Entity enemy) {
-                // 玩家死亡
-                player.getComponent(PlayerComponent.class).die();
-                // 重置所有敌人状态
-                resetAllEnemies();
-            }
-        });
-
-        // 玩家与鸟碰撞时触发死亡
-        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.BIRD) {
-            @Override
-            protected void onCollisionBegin(Entity player, Entity bird) {
-                // 玩家死亡
-                player.getComponent(PlayerComponent.class).die();
-                // 重置所有敌人状态
-                resetAllEnemies();
-            }
-        });
-
-        // 子弹与鸟碰撞
-        physics.addCollisionHandler(new CollisionHandler(EntityType.BULLET, EntityType.BIRD) {
-            @Override
-            protected void onCollisionBegin(Entity bullet, Entity bird) {
-                bullet.removeFromWorld();
-                bird.removeFromWorld();
             }
         });
 
