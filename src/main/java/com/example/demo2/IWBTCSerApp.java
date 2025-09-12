@@ -123,7 +123,6 @@ public class IWBTCSerApp extends GameApplication {
         bindCameraToPlayer();
     }
 
-
     @Override
     protected void initInput() {
         // 获取输入系统
@@ -318,6 +317,13 @@ public class IWBTCSerApp extends GameApplication {
 
                 Point2D playerPos = player.getPosition();
                 checkpoint.getComponent(SavepointComponent.class).activate(playerPos);
+            }
+        });
+        //陷阱触发器
+        physics.addCollisionHandler(new CollisionHandler(EntityType.PLAYER, EntityType.TRIGGER) {
+            @Override
+            protected void onCollisionBegin(Entity player, Entity trigger) {
+                trigger.getComponent(TriggerComponent.class).trigger();
             }
         });
 

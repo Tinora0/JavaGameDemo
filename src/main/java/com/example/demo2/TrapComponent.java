@@ -1,5 +1,4 @@
 package com.example.demo2;
-
 import com.almasb.fxgl.entity.component.Component;
 import javafx.geometry.Point2D;
 import javafx.util.Duration;
